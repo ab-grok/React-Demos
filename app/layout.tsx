@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Figtree } from "next/font/google";
 import "./globals.css";
+import { cn } from "@/lib/utils";
+import { ReactQueryProvider } from "./hooks/react-query-provider";
+import { ContextProvider } from "./hooks/ContextProvider";
+
+const figtree = Figtree({ subsets: ["latin"], variable: "--font-sans" });
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
@@ -23,11 +23,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={cn("font-sans", figtree.variable)}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} box-border grid h-screen w-screen antialiased`}
       >
-        {children}
+        <ContextProvider>{children}</ContextProvider>
       </body>
     </html>
   );
