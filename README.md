@@ -9,7 +9,7 @@ This repository is part of my ongoing series where I teach modern frontend conce
 
 ## 🎯 What You’ll Find Here
 
-Turotial scripts can be found in `_/app/prev-classes_` named as the treated programming concept:
+Turotial scripts can be found in `"_/app/prev-classes_"` named after the corresponding video name or concept treated:
 
 - A **focused code demo** (React or Next.js)
 - A **visual explanation** of how the concept behaves
