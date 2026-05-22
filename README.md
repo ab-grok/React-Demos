@@ -1,4 +1,4 @@
-# React Demos — (Explained in Reels)
+# React Demos — (Concepts Explained in Reels)
 
 Repo contains a growing collection of **short from, React and Next.js demos** designed for fast learning and visual understanding.  
 Each demo corresponds to a **1‑minute educational video** that breaks down a single concept with clear examples, animations, and practical use cases.
