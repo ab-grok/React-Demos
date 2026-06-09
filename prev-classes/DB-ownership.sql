@@ -29,7 +29,7 @@ AND nspname <> 'information_schema'
 ORDER BY schema;
 
 
--- 6) ===> Query to check the ownership of tables in a specific schema
+-- 6) ===> Query to check the ownership of all tables in database;  
 SELECT schemaname,
        tablename,
        tableowner
