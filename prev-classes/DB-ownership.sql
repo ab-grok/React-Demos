@@ -1,76 +1,69 @@
--- 1) ===> Creating a new role (group);
-CREATE ROLE <role_name> NOLOGIN;
+-- 1) ===> Creating a new role (group) with login so it can be used to connect to the database (if needed); role_name is treated as a group;
+CREATE ROLE <role_name> WITH LOGIN PASSWORD '<password>';
 
 
--- 2) ===> Add roles to role group
-GRANT <role_name> TO <role_name1>, <role_name2>;
+-- 2) ===> Granting a role_name to user_role makes user_role a member of role_name, inheriting privileges;
+GRANT <role_name> TO <user_role1>, <user_role2>;
 
 
 -- 3) ===> Change database ownership
-ALTER DATABASE shooter OWNER TO <role_name>;
+ALTER DATABASE <database_name> OWNER TO <role_name>;
 
 
 -- 3) ===> Change schema ownership
 ALTER SCHEMA <schema_name> OWNER TO <role_name>;
 
-
+ 
 -- 4) ===> Query to check the ownership of current database;
-SELECT pg_get_userbyid(datdba)
-FROM pg_database
-WHERE datname = current_database();
+SELECT pg_get_userbyid(datdba) FROM pg_database WHERE datname = current_database();
 
 
 -- 5) ===> Query to check the ownership of schemas in the database
-SELECT nspname AS schema,
-       pg_get_userbyid(nspowner) AS owner -- pg_get_userbyid() returns the username for the id in nspowner column;
-FROM pg_namespace 
-WHERE nspname NOT LIKE 'pg_%'
-AND nspname <> 'information_schema'                 
-ORDER BY schema;
+SELECT nspname AS schema, pg_get_userbyid(nspowner) AS owner  
+        FROM pg_namespace  
+        WHERE nspname NOT LIKE 'pg_%' 
+        AND nspname <> 'information_schema'
+        ORDER BY schema;
 
 
 -- 6) ===> Query to check the ownership of all tables in database;  
-SELECT schemaname,
-       tablename,
-       tableowner
-FROM pg_tables
-WHERE schemaname NOT LIKE 'pg_%'
-AND schemaname <> 'information_schema'
-ORDER BY schemaname, tablename;
+SELECT schemaname, tablename, tableowner 
+    FROM pg_tables 
+    WHERE schemaname NOT LIKE 'pg_%' 
+    AND schemaname <> 'information_schema' 
+    ORDER BY schemaname, tablename;
 
 
--- 7) ===> Query to transfer ownwership of all schemas in the database to a new role;
+-- 7) ===> Query to transfer ownwership of all schemas in the database to another role;
 DO $$ 
 DECLARE
     r RECORD;
 BEGIN
-    FOR r IN SELECT nspname  -- column holding all schema names in pg_namespace;
-             FROM pg_namespace -- system catalog table that contains a row for each schema in the database;
-             WHERE nspname NOT LIKE 'pg_%' -- Exclude 'system' schemas that start with 'pg_'
-               AND nspname <> 'information_schema' -- <> does the same as !=; 
+    FOR r IN SELECT nspname  
+             FROM pg_namespace
+             WHERE nspname NOT LIKE 'pg_%' AND nspname <> 'information_schema' -- <> does the same as !=; 
     LOOP
-        EXECUTE 'ALTER SCHEMA ' 
-        || quote_ident(r.nspname) 
-        || ' OWNER TO <role_name> ;';
+        EXECUTE format('ALTER SCHEMA %I OWNER TO <role_name>', r.nspname); -- format() is used to safely format the SQL command, %I is for identifiers (like schema names) to prevent SQL injection;
     END LOOP; 
 END $$;
 
 
--- 8) ===> Transfer ownership of all tables in a schema
-DO $$ -- The two dollar signs (`$$`) are used to define a string literal that can contain multiple lines and special characters without needing to escape them;
-DECLARE
+-- 8) ===> Query to transfer ownership of all tables in the database to another role;
+DO $$ 
+DECLARE 
     r RECORD;
-BEGIN
-    FOR r IN SELECT tablename FROM pg_tables WHERE schemaname = <schema>
-    LOOP -- LOOP over each r in tablename[];
-        EXECUTE 'ALTER TABLE <schema_name>.' 
-        || quote_ident(r.tablename) 
-        || ' OWNER TO <role_name>;';
-    END LOOP;
+BEGIN 
+    FOR r IN SELECT schemaname, tablename 
+             FROM pg_tables 
+             WHERE schemaname NOT LIKE 'pg_%' 
+               AND schemaname <> 'information_schema' 
+    LOOP
+        EXECUTE format('ALTER TABLE %I.%I OWNER TO <role_name>', r.schemaname, r.tablename);
+    END LOOP; 
 END $$;
 
 
--- 9) ===> Query to grant READ/WRITE access on all tables in all schemas to new role;
+-- 9) ===> Query to grant READ/WRITE access on all tables in all schemas to new role -- not needed if owner;
 DO $$ 
 DECLARE
     r RECORD;
@@ -80,14 +73,41 @@ BEGIN
              WHERE nspname NOT LIKE 'pg_%' 
                AND nspname <> 'information_schema' 
     LOOP
-        EXECUTE 'GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA ' 
-        || quote_ident(r.nspname) 
-        || ' TO <role_name>;'; 
+        EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA %I TO <role_name>', r.nspname);
     END LOOP; 
 END $$;
 
 
--- 10) ===> Grant READ/WRITE access on the schema and tables to the new role;
+-- 10) ===> Query to grant USAGE on all sequences in all schemas to new role -- not needed if owner;
+DO $$ 
+DECLARE
+    r RECORD;
+BEGIN
+    FOR r IN SELECT nspname
+             FROM pg_namespace
+             WHERE nspname NOT LIKE 'pg_%' 
+               AND nspname <> 'information_schema' 
+    LOOP
+        EXECUTE format('GRANT USAGE ON ALL SEQUENCES IN SCHEMA %I TO <role_name>', r.nspname);
+    END LOOP; 
+END $$;
+
+-- 11) ===> Query to grant READ/WRITE access on all tables added in the future in all schemas to new role -- not needed if owner ;
+DO $$ 
+DECLARE 
+    r RECORD;
+BEGIN
+    FOR r IN SELECT nspname
+             FROM pg_namespace
+             WHERE nspname NOT LIKE 'pg_%' 
+               AND nspname <> 'information_schema' 
+    LOOP
+        EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO <role_name>', r.nspname);
+    END LOOP; 
+END $$;
+
+
+-- 12) ===> A bunch of statements to grant READ/WRITE access on the schema and tables to the new role (not needed if owner);
 -- Grant permission to connect to the database
 GRANT CONNECT ON DATABASE <database> TO <role_name>;
 
