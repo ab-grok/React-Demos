@@ -1,4 +1,4 @@
--- 1) ===> Creating a new role (group) with login so it can be used to connect to the database (if needed); role_name is treated as a group;
+-- 1) ===> Creating a new role (group) with login so it can be used to connect to the database (if needed); role_name here is treated as a group;
 CREATE ROLE <role_name> WITH LOGIN PASSWORD '<password>';
 
 
@@ -91,6 +91,7 @@ BEGIN
         EXECUTE format('GRANT USAGE ON ALL SEQUENCES IN SCHEMA %I TO <role_name>', r.nspname);
     END LOOP; 
 END $$;
+
 
 -- 11) ===> Query to grant READ/WRITE access on all tables added in the future in all schemas to new role -- not needed if owner ;
 DO $$ 
