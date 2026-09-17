@@ -1,22 +1,21 @@
-// aws/Create-Role-Policy.js
+// aws/<Script-Name>.js
 
 /*
  * About:
- * This script lets you create a scheduler role invoking a lambda function
+ * This script lets you create a Scheduler Role with a policy (permission) for invoking a lambda function
  *
  * To Set up:
  * 1. npm init -y
- * 2. In package.json:
- * a. change type to module
+ * 2. In package.json, change "type" to "module"
  * 3. in terminal run `npm i @aws-sdk/client-iam`
  *
  * Usage (node):
- * 1. node Create-Role-Policy.js
- * 2. node Create-Role-Policy.js delete #to delete the role and policy
+ * 1. node <Script-Name>.js
+ * 2. node <Script-Name>.js delete #to delete the role and policy
  *
  * Usage (npm):
- * 0. Place in package.json "scripts": "Create-Role-Policy": "node Create-Role-Policy.js"
- * 0. Place in package.json "scripts": "Delete-Role-Policy": "node Create-Role-Policy.js delete"
+ * 0. Place in package.json "scripts": "Create-Role-Policy": "node <Script-Name>.js"
+ * 0. Place in package.json "scripts": "Delete-Role-Policy": "node <Script-Name>.js delete"
  * 1. npm run Create-Role-Policy
  * 2. npm run Delete-Role-Policy
  */
@@ -63,14 +62,15 @@ async function createRoleAndPolicy() {
     roleName: roleResp.Role.RoleName,
   });
 
-  // Policies define the access permissions (to other resources) you'd assign to the role;
+  // Policies define the access permissions the Role gets of other resources;
+  // the resource is lambda here, but can be many others;
   const policy = {
     Version: "2012-10-17",
     Statement: [
       {
         Effect: "Allow",
         Action: "lambda:InvokeFunction",
-        Resource: "arn:aws:lambda:us-east-1:1234567890:function:Lambda-Shooter",
+        Resource: "arn:aws:lambda:us-east-1:1234567890:function:<Lambda-Name>",
       },
     ],
   };
@@ -82,12 +82,13 @@ async function createRoleAndPolicy() {
     }),
   );
 
+  // Policy is created; Log its Arn and PolicyName
   console.log("Policy Created \n", {
     policyArn: policyResp.Policy.Arn,
     policyName: policyResp.Policy.PolicyName,
   });
 
-  // Attach policy to role
+  // Attach Policy to Role
   const attachResp = await iamClient.send(
     new AttachRolePolicyCommand({
       RoleName: "Scheduler-Exec-Role",
@@ -100,7 +101,7 @@ async function createRoleAndPolicy() {
 
 // Delete Role and Policy: Try this if an error occurs during creation.
 async function deleteRoleAndPolicy() {
-  const client = new IAMClient({ region: "us-east-1" });
+  const client = new IAMClient({ region: REGION });
 
   try {
     const detachRoleResp = await client.send(
