@@ -1,6 +1,8 @@
 // aws/<Script-Name>.js
 
 /*
+ * ReadMe!
+ *
  * About:
  * This script lets you create a Scheduler Role with a policy (permission) for invoking a lambda function
  *
@@ -8,6 +10,7 @@
  * 1. npm init -y
  * 2. In package.json, change "type" to "module"
  * 3. in terminal run `npm i @aws-sdk/client-iam`
+ * 4. Placeholder ARNs used. ARNs are provided on creation of any aws resource. Copy and paste that here.
  *
  * Usage (node):
  * 1. node <Script-Name>.js
@@ -106,8 +109,8 @@ async function deleteRoleAndPolicy() {
   try {
     const detachRoleResp = await client.send(
       new DetachRolePolicyCommand({
-        RoleName: "Scheduler-Exec-Role",
-        PolicyArn: "arn:aws:iam::1234567890:policy/Scheduler-Shooter-Policy",
+        RoleName: "Scheduler-Exec-Role", //
+        PolicyArn: "arn:aws:iam::1234567890:policy/<Policy-Name>", // Policy-Name is same as was attached in createRolePolicy
       }),
     );
     console.log(
