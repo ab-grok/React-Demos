@@ -10,7 +10,7 @@
  * 1. npm init -y
  * 2. In package.json, change "type" to "module"
  * 3. in terminal run `npm i @aws-sdk/client-iam`
- * 4. Placeholder ARNs used. ARNs are provided on creation of any aws resource. Copy and paste that here.
+ * 4. Placeholder ARNs used. ARNs are provided on creation of any aws resource. Copy and paste that as the resource value in Policy definition.
  *
  * Usage (node):
  * 1. node <Script-Name>.js
