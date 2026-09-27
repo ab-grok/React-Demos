@@ -1,0 +1,17 @@
+{
+  "name": "aws-scheduler",
+  "version": "1.0.0",
+  "description": "",
+  "main": "Scheduler.js",
+  "scripts": {
+    "schedule": "node Scheduler.js Schedules.jsonc",
+    "delete-schedule": "node Scheduler.js Schedules.jsonc delete"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@aws-sdk/client-scheduler": "^3.1136.0"
+  }
+}

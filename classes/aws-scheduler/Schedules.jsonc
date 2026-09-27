@@ -1,0 +1,8 @@
+[
+  {
+    "Name": "Every-Ten-Minutes",
+    "ScheduleExpression": "cron(*/10 * * * ? *)",
+    "TargetArn": "arn:aws:lambda:us-east-1:123456789:function:Lambda-Shooter",
+    "RoleArn": "arn:aws:iam::123456789:role/Scheduler-Exec-Role"
+  }
+]
